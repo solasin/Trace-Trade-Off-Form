@@ -95,7 +95,8 @@ int readData(FVL_INFO* info, FVL_TMP* tmp, char* path) //include ratings both in
 	fp = fopen(ch, "r");
 	for (i = 0; i < num_tr; i++)
 	{
-		fscanf(fp, "%d%d%d", &tp, &(tmp->Vorder[i]), &tpp);
+		double tpp_dbl;
+		fscanf(fp, "%d%d%lf", &tp, &(tmp->Vorder[i]), &tpp_dbl);
 		tmp->Vorder[i]--;
 	}
 	fclose(fp);
