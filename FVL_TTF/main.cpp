@@ -110,7 +110,7 @@ int readData(FVL_INFO* info, FVL_TMP* tmp, char* path) //include ratings both in
 	}
 	fclose(fp);
 
-	sprintf(ch, "%s/User_Num2.txt", path);
+	sprintf(ch, "%s/User_num.txt", path);
 	fp = fopen(ch, "r");
 	for (i = 0; i < nU; i++)
 	{
@@ -119,7 +119,7 @@ int readData(FVL_INFO* info, FVL_TMP* tmp, char* path) //include ratings both in
 	}
 	fclose(fp);
 
-	sprintf(ch, "%s/Item_Num2.txt", path);
+	sprintf(ch, "%s/Item_num.txt", path);
 	fp = fopen(ch, "r");
 	for (i = 0; i < nV; i++)
 	{
@@ -237,7 +237,7 @@ int readData2(FVL_INFO* info, FVL_TMP* tmp, char* path) // only include ratings 
 	}
 	fclose(fp);
 
-	sprintf(ch, "%s/User_Num2.txt", path);
+	sprintf(ch, "%s/User_num.txt", path);
 	fp = fopen(ch, "r");
 	for (i = 0; i < nU; i++)
 	{
@@ -246,7 +246,7 @@ int readData2(FVL_INFO* info, FVL_TMP* tmp, char* path) // only include ratings 
 	}
 	fclose(fp);
 
-	sprintf(ch, "%s/Item_Num2.txt", path);
+	sprintf(ch, "%s/Item_num.txt", path);
 	fp = fopen(ch, "r");
 	for (i = 0; i < nV; i++)
 	{
