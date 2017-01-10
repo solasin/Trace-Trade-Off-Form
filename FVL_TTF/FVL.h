@@ -62,5 +62,7 @@ typedef struct FVL_tmp FVL_TMP;
 
 double globalOpt(FVL_INFO* info, FVL_TMP* tmp);  //print both the RMSE of the training set and the RMSE of the testing set
 double globalOpt2(FVL_INFO* info, FVL_TMP* tmp); //print only the RMSE of the training set
+
+double RMSE(double* R1, double* R2, int num);
 #endif
 

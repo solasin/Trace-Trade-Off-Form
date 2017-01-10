@@ -275,20 +275,44 @@ int readData2(FVL_INFO* info, FVL_TMP* tmp, char* path) // only include ratings 
 	return 0;
 }
 
-int saveSigma(FVL_INFO info, char* path)
+int saveSigma(FVL_INFO* info, char* path,double cur_lambda)
 {
 	char ch[100];
 	FILE* fp;
 	int i;
 
-	sprintf(ch, "%s/sigma.txt", path);
+	sprintf(ch, "%s/%.6lfsigma.txt", cur_lambda,path);
 	fp = fopen(ch, "w");
-	fprintf(fp, "%d\n", info.p);
-	for (i = 0; i < info.p; i++)
-		fprintf(fp, "%g\n", info.sigma[i]);
+	fprintf(fp, "%d\n", info->p);
+	for (i = 0; i < info->p; i++)
+		fprintf(fp, "%g\n", info->sigma[i]);
 	fclose(fp);
 	freopen("CON", "w", stdout);
 	return 0;
+}
+
+double para_tune(double cur_lambda, double cur_epsilon, int cur_ty, FVL_INFO *cur_info, FVL_TMP *cur_tmp, char *cur_path){
+	 cur_tmp->epsilon= cur_epsilon;
+	 cur_tmp->lambda = cur_lambda;
+	 if (cur_ty == 0)
+		 readData(cur_info, cur_tmp, cur_path);
+	 else
+		 readData2(cur_info, cur_tmp, cur_path);
+	 cur_tmp->M = cur_info->N / 20.0;
+	 printf("MaxR: %g\n", cur_tmp->MaxR);
+	 printf("MinR: %g\n", cur_tmp->MinR);
+	 printf("Meanr: %g\n", cur_tmp->Meanr);
+	 printf("M: %g\n", cur_tmp->M);
+	 printf("epsilon: %g\n", cur_tmp->epsilon);
+	 printf("lambda: %g\n", cur_tmp->lambda);
+	 printf("path: %s\n",cur_path);
+	 if (cur_ty == 0)
+		 globalOpt(cur_info, cur_tmp);
+	 else
+		 globalOpt2(cur_info, cur_tmp);
+	 saveSigma(cur_info, cur_path,cur_lambda);
+	 return (RMSE(cur_info->ptsR, cur_info->tsR, cur_info->num_ts));
+
 }
 
 int main()
@@ -300,37 +324,21 @@ int main()
 	char path[100];
 	int i, ty;
 	
-	LAMBDA = 0.01;
-	i = 0;
-	while (LAMBDA <= 2.0 + EPSILON){
+	LAMBDA = 1.0;
+	for (int i = 0; i < 5; i++){
 		sprintf(path, "%s%d/", DATA_PATH, i);
-		tmp.epsilon = EPSILON;
-		tmp.lambda = LAMBDA;
-		ty = PROCESS_TYPE;
-		if (ty == 0)
-			readData(&info, &tmp, path);
-		else
-			readData2(&info, &tmp, path);
-		tmp.M = info.N / 20.0;
-		printf("MaxR: %g\n", tmp.MaxR);
-		printf("MinR: %g\n", tmp.MinR);
-		printf("Meanr: %g\n", tmp.Meanr);
-		printf("M: %g\n", tmp.M);
-		printf("epsilon: %g\n", tmp.epsilon);
-		printf("lambda: %g\n", tmp.lambda);
-		printf("path: %s\n", path);
-		if (ty == 0)
-			globalOpt(&info, &tmp);
-		else
-			globalOpt2(&info, &tmp);
-
-		saveSigma(info, path);
-
-		if (LAMBDA < 0.1)
-			LAMBDA += 0.005;
-		else
-			LAMBDA += 0.01;
-		i++;
+		double lambda_li = 0.0;
+		double lambda_ri = 1.0;
+		while (lambda_ri - lambda_li>0.001){
+			double lambda_lm = lambda_li + (lambda_ri - lambda_li) / 3.0;
+			double lambda_rm = lambda_ri - (lambda_ri - lambda_li) / 3.0;
+			double tst_rmse_li = para_tune(lambda_lm, EPSILON, 0, &info, &tmp, path);
+			double tst_rmse_ri = para_tune(lambda_rm, EPSILON, 0, &info, &tmp, path);
+			if (tst_rmse_li > tst_rmse_ri)
+				lambda_li = lambda_lm;
+			else
+				lambda_ri = lambda_rm;
+		}
 	}
 	
 	/*sprintf(path, DATA_PATH);
