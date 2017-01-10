@@ -255,12 +255,12 @@ double localOpt(FVL_INFO* info, FVL_TMP* tmp)
 	while (i < 100000 && err > tmp->epsilon)
 	{
 		lbfgs_direct(tmp->dY[0], tmp->Y[0], tmp->pz);
-		//		cost = localOptUpdateModel(info, tmp, cost);
+		//cost = localOptUpdateModel(info, tmp, cost);
 		cost = localOptUpdateModel_steepest_lbfgs(info, tmp, cost);
 		localOptComputeGradient(*info, *tmp);
 		err = cblas_ddot(info->p * info->N, tmp->dY[0], 1, tmp->dY[0], 1) / (info->p * info->N);
 		i++;
-		//		printf("iter: %d, cost: %g, error: %g\n", i, cost, err);
+		//printf("iter: %d, cost: %g, error: %g\n", i, cost, err);
 	}
 
 	lbfgs_free();

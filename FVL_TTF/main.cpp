@@ -7,6 +7,7 @@
 #include "MF_sparse_matrix.h"
 #include "FVL.h"
 #include"Global_Config.h"
+double LAMBDA;
 
 int readData(FVL_INFO* info, FVL_TMP* tmp, char* path) //include ratings both in the testing set and the training set.
 {
@@ -286,7 +287,7 @@ int saveSigma(FVL_INFO info, char* path)
 	for (i = 0; i < info.p; i++)
 		fprintf(fp, "%g\n", info.sigma[i]);
 	fclose(fp);
-
+	freopen("CON", "w", stdout);
 	return 0;
 }
 
@@ -298,7 +299,41 @@ int main()
 	FVL_TMP tmp;
 	char path[100];
 	int i, ty;
-	sprintf(path, DATA_PATH);
+	
+	LAMBDA = 0.01;
+	i = 0;
+	while (LAMBDA <= 2.0 + EPSILON){
+		sprintf(path, "%s%d/", DATA_PATH, i);
+		tmp.epsilon = EPSILON;
+		tmp.lambda = LAMBDA;
+		ty = PROCESS_TYPE;
+		if (ty == 0)
+			readData(&info, &tmp, path);
+		else
+			readData2(&info, &tmp, path);
+		tmp.M = info.N / 20.0;
+		printf("MaxR: %g\n", tmp.MaxR);
+		printf("MinR: %g\n", tmp.MinR);
+		printf("Meanr: %g\n", tmp.Meanr);
+		printf("M: %g\n", tmp.M);
+		printf("epsilon: %g\n", tmp.epsilon);
+		printf("lambda: %g\n", tmp.lambda);
+		printf("path: %s\n", path);
+		if (ty == 0)
+			globalOpt(&info, &tmp);
+		else
+			globalOpt2(&info, &tmp);
+
+		saveSigma(info, path);
+
+		if (LAMBDA < 0.1)
+			LAMBDA += 0.005;
+		else
+			LAMBDA += 0.01;
+		i++;
+	}
+	
+	/*sprintf(path, DATA_PATH);
 	tmp.epsilon = EPSILON;
 	tmp.lambda = LAMBDA;
 	ty = PROCESS_TYPE;
@@ -308,14 +343,6 @@ int main()
 	else
 		readData2(&info, &tmp, path);
 	tmp.M = info.N / 20.0;
-
-	/*
-	char* path = "../MovieLens/samples/0.01/crossValidation/fold5";
-	//	char* path = "../MovieLens";
-
-	tmp.lambda = 2.0;
-	tmp.epsilon = 1.0E-5;
-	*/
 	printf("MaxR: %g\n", tmp.MaxR);
 	printf("MinR: %g\n", tmp.MinR);
 	printf("Meanr: %g\n", tmp.Meanr);
@@ -323,13 +350,12 @@ int main()
 	printf("epsilon: %g\n", tmp.epsilon);
 	printf("lambda: %g\n", tmp.lambda);
 	printf("path: %s\n", path);
-
 	if (ty == 0)
 		globalOpt(&info, &tmp);
 	else
 		globalOpt2(&info, &tmp);
 
-	saveSigma(info, path);
+	saveSigma(info, path);*/
 
 	return 0;
 }
